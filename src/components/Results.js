@@ -41,7 +41,6 @@ function Results({ tracks, addToPlaylist }) {
   };
 
   const trackStyle = {
-    backgroundColor: 'transparent',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
