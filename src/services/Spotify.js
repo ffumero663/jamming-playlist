@@ -1,6 +1,5 @@
 const SPOTIFY_API_URL = 'https://api.spotify.com/v1';
 
-
 // Function to search songs using Spotify API
 export async function searchTracks(query, token) {
   try {
@@ -22,8 +21,6 @@ export async function searchTracks(query, token) {
     throw error;  
   }
 }
-
-
 
 // Function to create a playlist
 export async function createSpotifyPlaylist(userId, playlistName, token) {
@@ -60,9 +57,7 @@ export async function createSpotifyPlaylist(userId, playlistName, token) {
   }
 }
 
-
-
-
+// Function to add tracks to a playlist
 export async function addTracksToPlaylist(playlistId, trackUris, token) {
   try {
     const response = await fetch(`${SPOTIFY_API_URL}/playlists/${playlistId}/tracks`, {
@@ -83,7 +78,8 @@ export async function addTracksToPlaylist(playlistId, trackUris, token) {
       throw new Error('Failed to add tracks to playlist');
     }
   } catch (error) {
-    console.error('Error adding tracks:', error);
+    console.error('Error adding tracks to playlist:', error.message);
+    throw error;
   }
 }
 

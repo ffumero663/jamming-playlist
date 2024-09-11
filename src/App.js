@@ -17,10 +17,15 @@ function App() {
 
   useEffect(() => {
     const tokenFromUrl = getAccessToken();
-    if (tokenFromUrl) {
-      console.log("Token obtained:", tokenFromUrl); // Log the token
-      setToken(tokenFromUrl);
-      fetchUserId(tokenFromUrl); 
+    const tokenFromStorage = window.localStorage.getItem('spotifyAccessToken'); // Get token from localStorage
+    const finalToken = tokenFromUrl || tokenFromStorage;
+
+    if (finalToken) {
+      console.log("Token obtained:", finalToken); 
+      setToken(finalToken);
+      fetchUserId(finalToken); // Fetch the userId
+    } else {
+      setMessage('Please login to Spotify to use the app.');
     }
   }, []);
 
@@ -42,6 +47,7 @@ function App() {
       setMessage('Error fetching user ID: ' + error.message);
     }
   };
+
   const handleSearch = async (query) => {
     if (!token) return;
     try {
@@ -53,7 +59,6 @@ function App() {
       setMessage("Error searching tracks: " + error.message); 
     }
   };
-  
 
   const addToPlaylist = (track) => {
     if (!playlist.some((t) => t.id === track.id)) {
@@ -66,7 +71,7 @@ function App() {
   };
 
   const createPlaylist = async () => {
-    console.log("Create Playlist button clicked"); // Ensure the button works
+    console.log("Create Playlist button clicked"); 
 
     if (!playlistName || playlist.length === 0) {
       setMessage('Please enter a playlist name and add tracks to the playlist.');
@@ -81,12 +86,12 @@ function App() {
       setMessage(message);
 
       const trackUris = playlist.map((track) => track.uri); // Ensure the correct URIs are passed
-      console.log('Track URIs:', trackUris); // Log URIs for debugging
+      console.log('Track URIs:', trackUris); 
       await addTracksToPlaylist(playlistId, trackUris, token);
   
       setMessage(`Playlist "${playlistName}" created successfully with ${playlist.length} tracks`);
     } catch (error) {
-      console.error('Error creating playlist:', error); // Log any errors
+      console.error('Error creating playlist:', error); 
       setMessage('Error creating playlist: ' + error.message);
     }
   };
@@ -97,6 +102,7 @@ function App() {
 
   const handleLogout = () => {
     setToken('');
+    window.localStorage.removeItem('spotifyAccessToken'); // Remove token on logout
     window.location.hash = '';
     window.location.reload();
   };
@@ -114,7 +120,6 @@ function App() {
     cursor: 'pointer', 
     transition: 'background-color 0.3s ease', 
     fontWeight: 700,
-
   };
 
   const logOutButtonHover ={
@@ -139,7 +144,6 @@ function App() {
     width: '100vw',   // Full screen width
   };
   
-
   const containerStyle = {
     display: 'flex',
     justifyContent: 'space-between',
@@ -149,7 +153,6 @@ function App() {
     alignItems: 'flex-start',
   };
   
-
   const button ={
     marginTop: '15%',
     marginLeft: '37%',
@@ -179,20 +182,21 @@ function App() {
         onMouseLeave={(e) => e.target.style.backgroundColor = button.backgroundColor}
           >
           Login with Spotify
-          </button>    
-           ) : (
+        </button>    
+      ) : (
         <>
-        <div style={appStylePlaylist}>
-          <SearchBar onSearch={handleSearch} />
-          <div style={containerStyle}>
-            <Results tracks={tracks} addToPlaylist={addToPlaylist} />
-            <Playlist
-              playlist={playlist}
-              removeFromPlaylist={removeFromPlaylist}
-              createPlaylist={createPlaylist}
-              handlePlaylistNameChange={handlePlaylistNameChange}
-              playlistName={playlistName}
-            />
+          <div style={appStylePlaylist}>
+            <SearchBar onSearch={handleSearch} />
+            <div style={containerStyle}>
+              <Results tracks={tracks} addToPlaylist={addToPlaylist} />
+              <Playlist
+                playlist={playlist}
+                removeFromPlaylist={removeFromPlaylist}
+                createPlaylist={createPlaylist}
+                handlePlaylistNameChange={handlePlaylistNameChange}
+                playlistName={playlistName}
+              />
+            </div>
           </div>
           {/* Display success or error message */}
           <p style={{ color: 'white', textAlign: 'center', marginTop: '20px' }}>{message}</p> 
@@ -204,7 +208,6 @@ function App() {
               >
                 Log Out
               </button>
-              </div>
         </>
       )}
     </div>
@@ -212,6 +215,7 @@ function App() {
 }
 
 export default App;
+
 
 
 

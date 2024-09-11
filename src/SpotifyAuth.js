@@ -1,5 +1,5 @@
 const CLIENT_ID = '3f5a58c6617841bba9dc54348b641d96'; // Your Spotify Client ID
-const REDIRECT_URI = 'http://localhost:3001'; // Redirect to your local server
+const REDIRECT_URI = 'https://jammingappplaylists.netlify.app/';
 const AUTH_ENDPOINT = 'https://accounts.spotify.com/authorize';
 const RESPONSE_TYPE = 'token';
 const SCOPES = [
@@ -18,8 +18,15 @@ export function authenticate() {
 
 export function getAccessToken() {
   const hash = window.location.hash;
-  const params = new URLSearchParams(hash.replace('#', '')); 
+  const params = new URLSearchParams(hash.replace('#', ''));
   const accessToken = params.get('access_token');
-  return accessToken;
+  
+  if (accessToken) {
+    // Store the token in localStorage for future use
+    window.localStorage.setItem('spotifyAccessToken', accessToken);
+    window.location.hash = ''; // Clean up the URL after storing the token
+  }
+
+  return accessToken || window.localStorage.getItem('spotifyAccessToken');
 }
 
