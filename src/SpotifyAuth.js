@@ -1,4 +1,4 @@
-const CLIENT_ID = '3f5a58c6617841bba9dc54348b641d96'; // Your Spotify Client ID
+const CLIENT_ID = '3f5a58c6617841bba9dc54348b641d96'; 
 const REDIRECT_URI = 'https://jammingappplaylists.netlify.app'; // Redirect to your local server
 const AUTH_ENDPOINT = 'https://accounts.spotify.com/authorize';
 const RESPONSE_TYPE = 'token';
