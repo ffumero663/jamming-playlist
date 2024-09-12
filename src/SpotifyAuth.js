@@ -19,19 +19,20 @@ export function authenticate() {
 }
 
 export function getAccessToken() {
-  const hash = window.location.hash;  // Get URL hash from the redirect URL after authentication
-  const params = new URLSearchParams(hash.replace('#', ''));  // Convert hash into query parameters
-  const accessToken = params.get('access_token');  // Extract access token
+  const hash = window.location.hash;
+  const params = new URLSearchParams(hash.replace('#', ''));
+  const accessToken = params.get('access_token');
 
   if (accessToken) {
-    // Store the token in localStorage for future use
     window.localStorage.setItem('spotifyAccessToken', accessToken);
-    window.location.hash = '';  // Clean up the URL after storing the token
+    window.location.hash = '';
   }
 
-  console.log('Access token retrieved:', accessToken);  // Log the token to check its presence
-  return accessToken || window.localStorage.getItem('spotifyAccessToken');  // Return the access token from URL or localStorage
+  console.log('Access token retrieved:', accessToken || window.localStorage.getItem('spotifyAccessToken'));
+
+  return accessToken || window.localStorage.getItem('spotifyAccessToken');
 }
+
 
 export function clearAccessToken() {
   // Helper function to clear token when needed (e.g., logout)

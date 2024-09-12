@@ -2,6 +2,11 @@ const SPOTIFY_API_URL = 'https://api.spotify.com/v1';
 
 // Function to search songs using Spotify API
 export async function searchTracks(query, token) {
+  if (!query) {
+    console.error("Search query is empty");
+    throw new Error("Please enter a search term.");
+  }
+
   try {
     const response = await fetch(`${SPOTIFY_API_URL}/search?q=${encodeURIComponent(query)}&type=track&limit=10`, {
       headers: {
@@ -9,18 +14,23 @@ export async function searchTracks(query, token) {
       },
     });
 
-    const data = await response.json();
+    const responseText = await response.text();
+    console.log("Raw response from Spotify:", responseText);
+
+    const data = JSON.parse(responseText);
+
     if (!response.ok) {
       throw new Error(`Error: ${data.error?.message || 'Failed to search tracks'}`);
     }
 
-    console.log('Track Search Response:', data); 
-    return data.tracks.items;  
+    return data.tracks.items;
+
   } catch (error) {
-    console.error('Error searching tracks:', error.message); 
-    throw error;  
+    console.error("Error searching tracks:", error.message);
+    throw error;
   }
 }
+
 
 // Function to create a playlist
 export async function createSpotifyPlaylist(userId, playlistName, token) {

@@ -157,7 +157,7 @@ function App() {
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat',
-    height: '130vh',  // Full screen height
+    height: '200vh',  // Full screen height
     width: '100vw',   // Full screen width
   };
   
