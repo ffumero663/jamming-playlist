@@ -6,6 +6,7 @@ import Playlist from './components/Playlist';
 import { authenticate, getAccessToken } from './SpotifyAuth';
 import { searchTracks, createSpotifyPlaylist, addTracksToPlaylist } from './services/Spotify'; 
 import purpleBackground from './images/purpleBackground.jpg'; 
+import './App.css';
 
 function App() {
   const [token, setToken] = useState('');
@@ -13,55 +14,57 @@ function App() {
   const [playlist, setPlaylist] = useState([]);
   const [playlistName, setPlaylistName] = useState(''); 
   const [userId, setUserId] = useState(''); 
-  const [message, setMessage] = useState(''); // For success/error message
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
-    const tokenFromUrl = getAccessToken();  // Get the token from URL hash
-    const tokenFromStorage = window.localStorage.getItem('spotifyAccessToken');  // Get the token from localStorage
-    const finalToken = tokenFromUrl || tokenFromStorage;  // Use either token from URL or from localStorage
-  
-    // Log the retrieved token for debugging
-    console.log("Access Token from URL or Storage:", finalToken);
+    const tokenFromUrl = getAccessToken();
+    const tokenFromStorage = window.localStorage.getItem('spotifyAccessToken');
+    const finalToken = tokenFromUrl || tokenFromStorage;
   
     if (finalToken) {
-      setToken(finalToken);  // Store the token in state
-      fetchUserId(finalToken);  // Fetch the user ID using the token
+      setToken(finalToken);
+      fetchUserId(finalToken);
     } else {
-      setMessage('Please login to Spotify to use the app.');  // Show error message if no token
+      setMessage('Please login to Spotify to use the app.');
     }
-  }, []);  // This will run once when the component is mounted
+  }, []);
+  
   
 
   const fetchUserId = async (token) => {
     try {
-      console.log("Fetching user ID with token:", token);
-  
       const response = await fetch('https://api.spotify.com/v1/me', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
   
-      // Log the response before parsing
-      const responseText = await response.text(); // Get raw text instead of JSON
-      console.log('Raw response from Spotify:', responseText);
+      console.log('Response status:', response.status);  // Log the response status
   
-      // Check if response is not OK and handle errors
-      if (!response.ok) {
-        console.error('Error fetching user ID:', response.statusText);
-        throw new Error(`Failed to fetch user ID: ${response.statusText}`);
+      if (response.status === 401) {
+        console.log('Unauthorized request, re-authenticating...');
+        setMessage('Session expired, re-authenticating...');
+        authenticate();  // Trigger re-authentication if token is invalid
+        return;
       }
   
-      // Try to parse the response as JSON
-      const data = JSON.parse(responseText); // Parse the response manually
-      console.log('User ID fetched:', data.id);
-      setUserId(data.id);
+      // Check if the response is valid JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();  // Read response as text (HTML or error page)
+        console.error('Non-JSON response:', text);  // Log the full error response for better debugging
+        setMessage('Failed to fetch user information. Please check your token or try logging in again.');
+        return;
+      }
   
+      const data = await response.json();
+      setUserId(data.id);
     } catch (error) {
       console.error('Error fetching user ID:', error.message);
       setMessage('Error fetching user ID: ' + error.message);
     }
   };
+  
   
   
 
@@ -70,9 +73,7 @@ function App() {
     try {
       const results = await searchTracks(query, token);
       setTracks(results);
-      console.log('Search Results:', results); 
     } catch (error) {
-      console.error("Error searching tracks:", error.message);
       setMessage("Error searching tracks: " + error.message); 
     }
   };
@@ -88,27 +89,19 @@ function App() {
   };
 
   const createPlaylist = async () => {
-    console.log("Create Playlist button clicked"); 
-
     if (!playlistName || playlist.length === 0) {
       setMessage('Please enter a playlist name and add tracks to the playlist.');
       return;
     }
 
-    console.log('Token:', token); 
-    console.log('User ID:', userId); 
-  
     try {
       const { playlistId, message } = await createSpotifyPlaylist(userId, playlistName, token);
       setMessage(message);
 
-      const trackUris = playlist.map((track) => track.uri); // Ensure the correct URIs are passed
-      console.log('Track URIs:', trackUris); 
+      const trackUris = playlist.map((track) => track.uri);
       await addTracksToPlaylist(playlistId, trackUris, token);
-  
       setMessage(`Playlist "${playlistName}" created successfully with ${playlist.length} tracks`);
     } catch (error) {
-      console.error('Error creating playlist:', error); 
       setMessage('Error creating playlist: ' + error.message);
     }
   };
@@ -119,119 +112,60 @@ function App() {
 
   const handleLogout = () => {
     setToken('');
-    window.localStorage.removeItem('spotifyAccessToken'); // Remove token on logout
+    window.localStorage.removeItem('spotifyAccessToken');
+    window.localStorage.removeItem('spotifyTokenExpiration');
     window.location.hash = '';
-    window.location.reload();
-  };
-
-  const logOutButton ={
-    marginTop: '0%',
-    marginBottom: '25px',
-    marginLeft: '41%',
-    backgroundColor: '#9b59b6', 
-    color: '#ffffff', 
-    border: 'none', 
-    padding: '12px 80px', 
-    borderRadius: '25px', 
-    fontSize: '30px', 
-    cursor: 'pointer', 
-    transition: 'background-color 0.3s ease', 
-    fontWeight: 700,
-  };
-
-  const logOutButtonHover ={
-    backgroundColor: '#8e44ad',
-  };
-
-  const appStyle = {
-    backgroundImage: `url(${purpleBackground})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat',
-    height: '100vh',  // Full screen height
-    width: '100vw',   // Full screen width
-  };
-
-  const appStylePlaylist = {
-    backgroundImage: `url(${purpleBackground})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat',
-    height: '200vh',  // Full screen height
-    width: '100vw',   // Full screen width
+    authenticate();  // Force re-authentication to get a fresh token
   };
   
-  const containerStyle = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    flexWrap: 'wrap',
-    width: '80%',
-    margin: '50px auto',
-    alignItems: 'flex-start',
-  };
   
-  const button ={
-    marginTop: '15%',
-    marginLeft: '37%',
-    backgroundColor: '#9b59b6', 
-    color: '#ffffff', 
-    border: 'none', 
-    padding: '12px 80px', 
-    borderRadius: '25px', 
-    fontSize: '30px', 
-    cursor: 'pointer', 
-    transition: 'background-color 0.3s ease', 
-    fontWeight: 700,
-  };
-
-  const buttonHover ={
-    backgroundColor: '#8e44ad',
-  };
+  
 
   return (
-    <div style={appStyle}>
-      <Header />
-      {!token ? (
-        <button 
-        onClick={authenticate} 
-        style={button}
-        onMouseEnter={(e) => e.target.style.backgroundColor = buttonHover.backgroundColor}
-        onMouseLeave={(e) => e.target.style.backgroundColor = button.backgroundColor}
-          >
-          Login with Spotify
-        </button>    
-      ) : (
-        <>
-          <div style={appStylePlaylist}>
-            <SearchBar onSearch={handleSearch} />
-            <div style={containerStyle}>
-              <Results tracks={tracks} addToPlaylist={addToPlaylist} />
-              <Playlist
-                playlist={playlist}
-                removeFromPlaylist={removeFromPlaylist}
-                createPlaylist={createPlaylist}
-                handlePlaylistNameChange={handlePlaylistNameChange}
-                playlistName={playlistName}
-              />
-            </div>
+    <>
+  <Header />
+
+  <div  className='image'>
+    
+    {!token ? (
+      <div className='center-container'>
+      <button onClick={authenticate} className='log-in'>
+        Login with Spotify
+      </button>
+      </div>
+    ) : (
+      <>
+        <div>
+          <SearchBar onSearch={handleSearch}/>
+
+          <div className='containerStyle'>
+            <Results tracks={tracks} addToPlaylist={addToPlaylist}  />
+            <Playlist
+              playlist={playlist}
+              removeFromPlaylist={removeFromPlaylist}
+              createPlaylist={createPlaylist}
+              handlePlaylistNameChange={handlePlaylistNameChange}
+              playlistName={playlistName}
+            />
           </div>
-          {/* Display success or error message */}
-          <p style={{ color: 'white', textAlign: 'center', marginTop: '20px' }}>{message}</p> 
-          <button 
-                onClick={handleLogout} 
-                style={logOutButton}
-                onMouseEnter={(e) => e.target.style.backgroundColor = logOutButtonHover.backgroundColor}
-                onMouseLeave={(e) => e.target.style.backgroundColor = logOutButton.backgroundColor}
-              >
-                Log Out
-              </button>
-        </>
-      )}
-    </div>
+
+          {/* Place Log Out button here, outside of containerStyle */}
+          <button onClick={handleLogout} className='logOutButton'>
+            Log Out
+          </button>
+          
+          <p className='message'>{message}</p> 
+        </div>
+      </>
+    )}
+  </div>
+</>
+
   );
-}
+}  
 
 export default App;
+
 
 
 

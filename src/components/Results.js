@@ -1,6 +1,8 @@
 import React from 'react';
 
 function Results({ tracks, addToPlaylist }) {
+
+ 
   const squareContainer = {
     display: 'flex',
     justifyContent: 'flex-start',
@@ -64,25 +66,30 @@ function Results({ tracks, addToPlaylist }) {
   };
 
   const buttonStyle = {
-    fontSize: '30px',
+    fontSize: '24px',
     backgroundColor: 'transparent',
-    color: 'white',
+    color: '#9b59b6',
     border: 'none',
     cursor: 'pointer',
   };
+
+  
 
   return (
     <div style={squareContainer}>
       <div style={square}>
         <h2 style={h2Style}>Results</h2>
         <div style={resultsStyle}>
-          {tracks.length === 0}
+          {tracks.length === 0 && <p>No results found. Try searching for a song.</p>}
           {tracks.map(track => (
             <div key={track.id} style={trackStyle}>
+              {/* Display album image */}
               <img src={track.album.images[0]?.url} alt={track.name} style={imgStyle} />
+              {/* Track information */}
               <div style={trackInfoStyle}>
                 <p>{track.name} by {track.artists[0].name}</p>
               </div>
+              {/* "+" button */}
               <button style={buttonStyle} onClick={() => addToPlaylist(track)}>
                 +
               </button>
@@ -95,6 +102,7 @@ function Results({ tracks, addToPlaylist }) {
 }
 
 export default Results;
+
 
 
 

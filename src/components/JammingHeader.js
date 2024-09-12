@@ -1,27 +1,12 @@
 import React from 'react';
+import '../styles/Header.css';
 
 function Header(){
 
-  const divStyle = {
-    margin: 0,
-    border: '2px solid white',
-    backgroundColor: 'white',
-
-  }
-
-  const style = {
-    textAlign: 'center',
-    color: '#9b59b6',
-    fontSize: '65px'
-  }
-
-  const mmLetter = {
-    color: '#ff79c6',
-  }
   return(
-    <div style={divStyle}>
+    <div className='divStyle'>
 
-    <h1 style={style}>Ja<span style={mmLetter}>mm</span>ing</h1>
+    <h1 className='style'>Ja<span className='mmLetter'>mm</span>ing</h1>
     
     </div>
   );
