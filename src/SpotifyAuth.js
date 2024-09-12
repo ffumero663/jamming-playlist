@@ -1,10 +1,6 @@
-<<<<<<< HEAD
-const CLIENT_ID = '3f5a58c6617841bba9dc54348b641d96'; // Your Spotify Client ID
-const REDIRECT_URI = 'https://jammingappplaylists.netlify.app/';
-=======
+
 const CLIENT_ID = '3f5a58c6617841bba9dc54348b641d96'; 
 const REDIRECT_URI = 'https://jammingappplaylists.netlify.app'; 
->>>>>>> 3c18e9cde2522ac71cbf2fbcd7654beae87118aa
 const AUTH_ENDPOINT = 'https://accounts.spotify.com/authorize';
 const RESPONSE_TYPE = 'token';
 const SCOPES = [

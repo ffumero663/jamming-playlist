@@ -16,37 +16,50 @@ function App() {
   const [message, setMessage] = useState(''); // For success/error message
 
   useEffect(() => {
-    const tokenFromUrl = getAccessToken();
-    const tokenFromStorage = window.localStorage.getItem('spotifyAccessToken'); // Get token from localStorage
-    const finalToken = tokenFromUrl || tokenFromStorage;
-
+    const tokenFromUrl = getAccessToken();  // Get the token from URL hash
+    const tokenFromStorage = window.localStorage.getItem('spotifyAccessToken');  // Get the token from localStorage
+    const finalToken = tokenFromUrl || tokenFromStorage;  // Use either token from URL or from localStorage
+  
+    // Log the retrieved token for debugging
+    console.log("Access Token from URL or Storage:", finalToken);
+  
     if (finalToken) {
-      console.log("Token obtained:", finalToken); 
-      setToken(finalToken);
-      fetchUserId(finalToken); // Fetch the userId
+      setToken(finalToken);  // Store the token in state
+      fetchUserId(finalToken);  // Fetch the user ID using the token
     } else {
-      setMessage('Please login to Spotify to use the app.');
+      setMessage('Please login to Spotify to use the app.');  // Show error message if no token
     }
-  }, []);
+  }, []);  // This will run once when the component is mounted
+  
 
   const fetchUserId = async (token) => {
     try {
+      console.log("Fetching user ID with token:", token);  // Log the token used for fetching the user ID
+  
+      // Make the API request to Spotify
       const response = await fetch('https://api.spotify.com/v1/me', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
+  
+      // If the response is not OK, throw an error
       if (!response.ok) {
-        throw new Error('Failed to fetch user ID');
+        const errorData = await response.json();  // Get the error response from Spotify
+        console.log('Error Response from Spotify:', errorData);  // Log the error response
+        throw new Error(`Failed to fetch user ID: ${errorData.error?.message || 'Unknown error'}`);
       }
-      const data = await response.json();
-      console.log('User ID:', data.id); 
-      setUserId(data.id); 
+  
+      const data = await response.json();  // Get the user data
+      console.log('User ID fetched:', data.id);  // Log the fetched user ID
+      setUserId(data.id);  // Store the user ID in state
+  
     } catch (error) {
-      console.error('Error fetching user ID:', error);
-      setMessage('Error fetching user ID: ' + error.message);
+      console.error('Error fetching user ID:', error.message);  // Log the error
+      setMessage('Error fetching user ID: ' + error.message);  // Show error message to the user
     }
   };
+  
 
   const handleSearch = async (query) => {
     if (!token) return;
