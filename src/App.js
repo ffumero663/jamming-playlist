@@ -34,31 +34,35 @@ function App() {
 
   const fetchUserId = async (token) => {
     try {
-      console.log("Fetching user ID with token:", token);  // Log the token used for fetching the user ID
+      console.log("Fetching user ID with token:", token);
   
-      // Make the API request to Spotify
       const response = await fetch('https://api.spotify.com/v1/me', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
   
-      // If the response is not OK, throw an error
+      // Log the response before parsing
+      const responseText = await response.text(); // Get raw text instead of JSON
+      console.log('Raw response from Spotify:', responseText);
+  
+      // Check if response is not OK and handle errors
       if (!response.ok) {
-        const errorData = await response.json();  // Get the error response from Spotify
-        console.log('Error Response from Spotify:', errorData);  // Log the error response
-        throw new Error(`Failed to fetch user ID: ${errorData.error?.message || 'Unknown error'}`);
+        console.error('Error fetching user ID:', response.statusText);
+        throw new Error(`Failed to fetch user ID: ${response.statusText}`);
       }
   
-      const data = await response.json();  // Get the user data
-      console.log('User ID fetched:', data.id);  // Log the fetched user ID
-      setUserId(data.id);  // Store the user ID in state
+      // Try to parse the response as JSON
+      const data = JSON.parse(responseText); // Parse the response manually
+      console.log('User ID fetched:', data.id);
+      setUserId(data.id);
   
     } catch (error) {
-      console.error('Error fetching user ID:', error.message);  // Log the error
-      setMessage('Error fetching user ID: ' + error.message);  // Show error message to the user
+      console.error('Error fetching user ID:', error.message);
+      setMessage('Error fetching user ID: ' + error.message);
     }
   };
+  
   
 
   const handleSearch = async (query) => {
