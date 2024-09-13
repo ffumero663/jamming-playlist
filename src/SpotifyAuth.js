@@ -1,4 +1,4 @@
-const CLIENT_ID = 'ab38e51d4007417dade1a716ad3de347'; 
+const CLIENT_ID = '3f5a58c6617841bba9dc54348b641d96'; 
 const REDIRECT_URI = 'http://localhost:3005/';  // Ensure this matches exactly with Spotify Developer Dashboard
 const AUTH_ENDPOINT = 'https://accounts.spotify.com/authorize';
 const RESPONSE_TYPE = 'token';
